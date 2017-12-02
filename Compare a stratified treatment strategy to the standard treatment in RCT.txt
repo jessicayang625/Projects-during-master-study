@@ -177,4 +177,3 @@ index = which(results[,8]==1);
 mean(results[index,7]);
 pwr4 = length(index)/1000
 pwr4
-
