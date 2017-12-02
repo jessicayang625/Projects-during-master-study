@@ -30,12 +30,6 @@ library(DoseFinding)
 #dev.copy2pdf(device = quartz, file = UsersYeonilDesktopdose.pdf)
 
 
-
-
-
-
-
-
 ## logistic
 defBnds(mD=200)
 
