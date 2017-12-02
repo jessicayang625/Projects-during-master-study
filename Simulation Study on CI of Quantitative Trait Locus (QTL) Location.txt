@@ -52,11 +52,11 @@ Dis_D10h1_mr<-cbind(result.p13[,5],result.p13M0.05[,5],result.p13M0.2[,5])
 ##############################################################
 # Map.dens <- c(6,11)                                        #
 # Ef.size <-c(0.05,0.5,1)                                    #
-# p11：Marker number 6(10cM/each), effect size 0.05          #
+# p11???Marker number 6(10cM/each), effect size 0.05          #
 # p21: Marker number 11(5cM/each), effect size 0.05          #
-# p12：Marker number 6(10cM/each), effect size 0.5           #
+# p12???Marker number 6(10cM/each), effect size 0.5           #
 # p22: Marker number 11(5cM/each), effect size 0.5           #
-# p13：Marker number 6(10cM/each), effect size 1             #
+# p13???Marker number 6(10cM/each), effect size 1             #
 # p23: Marker number 11(5cM/each), effect size 1             #
 # 1: LOD method, 2: Boostrap method                          #
 ##############################################################
