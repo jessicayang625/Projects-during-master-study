@@ -1,0 +1,180 @@
+#Method 2 K=3, With X. sample size= 300,  with X, calculate power, trteft
+rm(list=ls());
+set.seed(1000);
+sim.num = 1000;  
+sample_size = 600;
+# Trtment effect setting
+alpha_0 = 0;
+# random error for generating Y
+ran.error = 1;	
+gen_data = function() {
+  z = rbinom(sample_size,1,0.5);
+  index = which(z==1);
+  N = length(index);
+  p = runif(N);
+  
+  subidx = which(p<1/2);
+  z[index[which(p<1/2)]] = 1;
+  
+  subidx1 = which(p>=1/2);
+  subidx2 = which(p<1);
+  z[index[intersect(subidx1,subidx2)]] = 2;
+  
+  error = rnorm(sample_size);
+  X = rnorm(sample_size);
+#trteft=0;
+ trteft<-matrix(0,600,1)
+  for (k in 1:600)
+  {
+    if (z[k]==1)
+    {trteft[k]=0.1}
+    if (z[k]==2)
+    {trteft[k]=0.3}
+  }
+  y = alpha_0 + trteft + error+X;
+  return (list(datmat=cbind(y,z)));
+}	
+m1func = function(datmat)  {
+  y = datmat[,1];
+  z = datmat[,2];
+  z[which(z>0)] = 1; 
+  lmsum = summary(lm(y~z))$coefficients;
+  ind = ifelse(lmsum[2,4]<0.05,1,0);
+  
+  return(list(est=lmsum[2,1],ind=ind));
+}
+
+m2func = function(datmat,K)  {
+  y = datmat[,1];
+  z = datmat[,2];
+  indx0 = which(z==0);
+  index = NULL;
+  for (i in 1:K)  {
+    indxk = which(z==i);
+    indx = c(indx0,indxk);
+    temy = c(y[indx0],y[indxk]);
+    temz = c(rep(0,length(indx0)),rep(1,length(indxk)));
+    lmsum = summary(lm(temy~temz))$coefficients;
+    temind = ifelse(lmsum[2,4]<0.05,1,0);
+    if (temind == 1)  index = c(index,indxk);
+  }
+  if (length(index)==0)  return (list(est=0,ind=0));
+  temy = c(y[indx0],y[index]);
+  temz = c(z[indx0],rep(1,length(index)));
+  lmsum = summary(lm(temy~temz))$coefficients;
+  
+  return(list(est=lmsum[2,1],ind=1));
+}
+
+m3func = function(datmat,K)  {
+  y = datmat[,1];
+  z = datmat[,2];
+  indx0 = which(z==0);
+  temz = z;
+  temz[which(temz>0)] = 1; 
+  lmsum = summary(lm(y~temz))$coefficients;
+  ind = ifelse(lmsum[2,4]<0.05,1,0);
+  
+  if (ind == 1)  return(list(est=lmsum[2,1],ind=1));
+  
+  index = NULL;
+  for (i in 1:K)  {
+    indxk = which(z==i);
+    indx = c(indx0,indxk);
+    temy = c(y[indx0],y[indxk]);
+    temz = c(rep(0,length(indx0)),rep(1,length(indxk)));
+    lmsum = summary(lm(temy~temz))$coefficients;
+    temind = ifelse(lmsum[2,4]<0.05,1,0);
+    if (temind == 1)  index = c(index,indxk);
+  }
+  if (length(index)==0)  return (list(est=0,ind=0));
+  temy = c(y[indx0],y[index]);
+  temz = c(z[indx0],rep(1,length(index)));
+  lmsum = summary(lm(temy~temz))$coefficients;
+  
+  return(list(est=lmsum[2,1],ind=1));
+}
+##################
+# M4 a function first to get the loop times regarding K 
+index.gen<-function(K,loop.num) {
+  if ( K == 2) {
+    if ( loop.num == 1) {
+      z <- c(1,"NA","NA")
+    } else if ( loop.num == 2) {
+      z <- c(2,"NA","NA")
+    } else if ( loop.num == 3) {
+      z <- c(1,2,"NA")
+    }
+  } else if (K == 3) {
+    if ( loop.num == 1) {
+      z <- c(1,"NA","NA")
+    } else if ( loop.num == 2) {
+      z <- c(2,"NA","NA")
+    } else if ( loop.num == 3) {
+      z <- c(3,"NA","NA")
+    }  else if ( loop.num == 4) {
+      z <- c(1,2,"NA")
+    } else if ( loop.num == 5) {
+      z <- c(1,3,"NA")
+    }  else if ( loop.num == 6) {
+      z <- c(2,3,"NA")
+    } else if ( loop.num == 7) {
+      z <- c(1,2,3)
+    } 
+  } 
+  return(z)
+}
+
+m4func<-function(datmat,K) {
+  y = datmat[,1];
+  z = datmat[,2];
+  indx0 = which(z==0);
+  my.p <- NULL  
+  my.est <- NULL
+  index = NULL
+  for (j in 1:(2^K-1))  {
+    loop.num <- j
+    my_z <- index.gen(K,loop.num)  
+    indxk =  c(which(z == my_z[1]), which(z == my_z[2]),which(z == my_z[3]))
+    indx = c(indx0,indxk);
+    temy = c(y[indx0],y[indxk]);
+    temz = c(rep(0,length(indx0)),rep(1,length(indxk)));
+    lmsum = summary(lm(temy~temz))$coefficients;
+    my.p <- c(my.p,lmsum[2,4])
+    my.est <- c(my.est,lmsum[2,1])
+    temind = ifelse(lmsum[2,4]<0.05,1,0)
+    if (temind == 1)  index = c(index,indxk);
+  }
+  if (length(index)==0)  return (list(est=0,ind=0))
+  my.p.est <- data.frame(my.p,my.est)
+  return(list(est=my.p.est[which.min(my.p.est[,1]),2],ind=1))
+}
+
+set.seed(1000);
+results = NULL;
+for (loop in 1:1000)  {
+  datset = gen_data()$datmat;			
+  m1reg = m1func(datset);
+  m2reg = m2func(datset,2);
+  m3reg = m3func(datset,2);
+  m4reg = m4func(datset,2);
+  temres = c(m1reg$est,m1reg$ind,m2reg$est,m2reg$ind,m3reg$est,m3reg$ind,m4reg$est,m4reg$ind);
+  results = rbind(results,temres);
+}
+index = which(results[,2]==1);
+mean(results[index,1]);
+pwr1 = length(index)/1000;
+pwr1
+index = which(results[,4]==1);
+mean(results[index,3]);
+pwr2 = length(index)/1000;
+pwr2
+index = which(results[,6]==1);
+mean(results[index,5]);
+pwr3 = length(index)/1000
+pwr3
+index = which(results[,8]==1);
+mean(results[index,7]);
+pwr4 = length(index)/1000
+pwr4
+
