@@ -175,3 +175,4 @@ ED(fmodels, p=0.5, EDtype = discrete, doses=doses)
 
 mods2 - list(linear = NULL, emax = c(0.05, 0.2), betaMod = c(0.5, 1),logistic = matrix(c(0.25, 0.7, 0.09, 0.06), byrow = FALSE, nrow = 2))
 plot(mods2)
+
