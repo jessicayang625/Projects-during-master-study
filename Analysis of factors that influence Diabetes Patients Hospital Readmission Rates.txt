@@ -73,5 +73,3 @@ yhat.rf = predict (diabete.rf,newdata =diabete.test)
 mean((yhat.rf-diabete.test11)^2)
 importance(diabete.rf)
 varImpPlot(diabete.rf)
-
-
